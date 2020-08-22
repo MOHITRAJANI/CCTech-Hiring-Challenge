@@ -1,0 +1,63 @@
+public static double total_length (double Coordinates[] , double sun[])
+    {
+        // Sample Input {4,0,4,-5,7 ,-5, 7,0};
+        // I convert the given input into 2 arrayLists for easy access or X and Y Coordinates.
+        ArrayList<Double> X_coordinates  = new ArrayList();
+        ArrayList<Double> Y_coordinates  = new ArrayList();
+        double length = 0;// The length that will be returned.
+        for(int i=0 ; i<Coordinates.length ; i++)
+        {
+            X_coordinates.add(Coordinates[i++]);
+            Y_coordinates.add(Coordinates[i]);
+        }
+        // Base condition -> If there are no buildings in the input.
+        if(X_coordinates.isEmpty() || Y_coordinates.isEmpty())
+            return 0;
+       
+        int itr_no = 1;//itr_no used because I no slope calculations are required for the very first building, as nothing covers it. 
+        for(int i=Y_coordinates.size()-1 ; i>2 ; i=i-4)
+        {
+            if( itr_no == 1 )
+            {
+                if(sun[1] > Y_coordinates.get(i))
+                {
+                    length = length + + Math.abs(X_coordinates.get(i) - X_coordinates.get(i-2));
+                }
+                length = length + Math.abs(Y_coordinates.get(i) - Y_coordinates.get(i-1)) ;
+                itr_no++;
+            }//This if runs only for the very first building.
+            else if(Y_coordinates.get(i) > Y_coordinates.get(i+4))
+            {
+                double slope = Math.abs((sun[1] - Y_coordinates.get(i+4))/(sun[0] - X_coordinates.get(i+4)));
+                double distance_between_buildings = Math.abs(X_coordinates.get(i-2) - X_coordinates.get(i+4));
+                double total_height_of_big_building = Math.abs(Y_coordinates.get(i) - Y_coordinates.get(i-1));
+                double total_height_of_smaller_building = Math.abs(Y_coordinates.get(i+4) - Y_coordinates.get(i-1+4));
+                double height_where_light_falls = total_height_of_big_building - total_height_of_smaller_building + (slope*distance_between_buildings);
+                if(sun[1] > Y_coordinates.get(i) )// The upper part of the building needs to be added if and only if the sun is at a higher position then the building.
+                {
+                    length = length + Math.abs(X_coordinates.get(i) - X_coordinates.get(i-2)); 
+                }
+                if(height_where_light_falls > 0)
+                {
+                    length = length + height_where_light_falls;
+                }
+                
+                itr_no++;
+            }
+            else if(Y_coordinates.get(i) < Y_coordinates.get(i+4))// Special kind of case if the height of second building comes less then the first one. In that case I simply calculate where on roof does the sunlight falls and add only that much length.
+            {
+                double slope = Math.abs((sun[1] - Y_coordinates.get(i+4))/(sun[0] - X_coordinates.get(i+4)));
+                double distance_between_buildings = Math.abs(X_coordinates.get(i-2) - X_coordinates.get(i+4));
+                double total_height_of_big_building = Math.abs(Y_coordinates.get(i) - Y_coordinates.get(i-1));
+                double total_height_of_smaller_building = Math.abs(Y_coordinates.get(i+4) - Y_coordinates.get(i-1+4));
+                double base = slope*(Math.abs(Y_coordinates.get(i) - Y_coordinates.get(i+4)));
+                itr_no++;
+                if(base + X_coordinates.get(i+4) < X_coordinates.get(i))// If the sunlight surpasses the roof of second building, then that means the second building does not have any sunrays falling on it.
+                {
+                     length = length + Math.abs(base + X_coordinates.get(i+4) - X_coordinates.get(i));
+                }
+            }
+        }   
+       
+        return length;
+    }

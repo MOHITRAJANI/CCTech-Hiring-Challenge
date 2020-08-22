@@ -1,0 +1,110 @@
+public static boolean isInside(double polygon[] , double point[])
+    {
+	// sample input {3,2, -2,-0.8,0,1.2,2.2,0,2,4.5}
+	//{0,0}
+        // Base condition, smallest number of vertices that make a polygon = 3.
+        if(polygon.length < 5)
+        {
+            return false;
+        }
+        //Getting X_coordinates in One ArrayList and Y_Coordinates in the other.
+        ArrayList<Double> X = new ArrayList();
+        ArrayList<Double> Y = new ArrayList();
+        for(int i=0 ; i<polygon.length ; i++)
+        {
+            X.add(polygon[i++]);
+            Y.add(polygon[i]);
+        }
+        boolean inside = false;
+        double distant_point = 999;// A line segment from point p to distant_point will help us analyse whether the point is inside or outside of polygon
+        
+       //Add this distant point to the X and Y ArrayList
+       X.add(distant_point);
+       Y.add(point[1]);
+       
+       int times_line_intersects = 0 ;// If intersections are even then piint is outside, else it is inside.
+       int i=0;
+       do
+       {
+          int next = (i+1) % (X.size()-1-1);//-1 because indexing starts from 0 , and other -1 because we added an extra x coordinate for distant location.
+          if(Intersects(X.get(i) , Y.get(i) , X.get(next) , Y.get(next), point[0] , point[1] , X.get(X.size()-1) , Y.get(X.size()-1)));
+          {
+              if(orientation(X.get(i) , Y.get(i), point[0] , point[1], X.get(next) , Y.get(next)) == 0)
+              {
+                  return Segment(X.get(i) , Y.get(i), point[0] , point[1], X.get(next) , Y.get(next));
+              }
+              times_line_intersects++;
+          }
+          i = next;
+       }while(i!=0);
+        
+       if(times_line_intersects %2 == 1)
+           return true;
+       return false;
+       
+    }
+    static int orientation(double px ,double py ,double qx ,double qy ,double rx,double ry)  
+    { 
+        int val = (int) ((int)(qy - py) * (rx - qx) 
+                        - (qx - px) * (ry - qy)); 
+  
+        if (val == 0)  
+        { 
+            return 0; // It might happen that P,Q,R are all in the ame line
+        } 
+        return (val > 0) ? 1 : 2; // Orientation helps  us decide if the lines intersect or not. 
+    }
+    
+    static boolean Segment(double px , double py, double qx , double qy , double rx , double ry) // Segment functions helps me to check if the coolinearity exits between the points.
+    { 
+        if (qx <= Math.max(px, rx) && 
+            qx >= Math.min(px, rx) && 
+            qy <= Math.max(py, ry) && 
+            qy >= Math.min(py, ry)) 
+        { 
+            return true; 
+        } 
+        return false; 
+    } 
+    
+    static boolean Intersects(double p1x ,double p1y ,double q1x ,double q1y ,double p2x,double p2y ,double q2x ,double q2y)  
+    { 
+        // The basic Idea for 2 Lines to intersect is that o1 and o2 should have same orientation AND o3 and o4 should have same orientation as well.
+        int o1 = orientation(p1x,p1y, q1x,q1y, p2x,p2y); 
+        int o2 = orientation(p1x,p1y, q1x,q1y, q2x,q2y); 
+        int o3 = orientation(p2x,p2y,q2x,q2y,p1x,p1y); 
+        int o4 = orientation(p2x,p2y,q2x,q2y,q1x,q1y); 
+  
+        // General case 
+        if (o1 != o2 && o3 != o4) 
+        { 
+            return true; 
+        } 
+  
+        // Dealing with some Special Cases of coolinearity.
+        if (o1 == 0 && Segment(p1x,p1y, p2x,p2y, q1x,q1y))  
+        { 
+            return true; 
+        } 
+  
+        
+        if (o2 == 0 && Segment(p1x,p1y,q2x,q2y,q1x,q1y))  
+        { 
+            return true; 
+        } 
+  
+         
+        if (o3 == 0 && Segment(p2x,p2y, p1x,p1y, q2x,q2y)) 
+        { 
+            return true; 
+        } 
+  
+        
+        if (o4 == 0 && Segment(p2x,p2y,q1x,q1y,q2x,q2y)) 
+        { 
+            return true; 
+        } 
+  
+        // If neither of the special case nor the base case then return false. That means Lines do not intersect. 
+        return false;  
+    }
